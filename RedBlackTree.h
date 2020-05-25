@@ -13,6 +13,7 @@ struct Node{
     Node* rigth = nullptr;
     Node* parent = nullptr;
     Color color = Red;
+
 };
 
 class RedBlackTree
@@ -32,6 +33,7 @@ class RedBlackTree
             NIL = new Node{-1, nullptr, nullptr, nullptr, Black};
         }
     private:
+        Node* treeMinimum(Node* subtreeRoot);
         Node* root;
         static Node* NIL;
         Node* createNode(int data,Color color)

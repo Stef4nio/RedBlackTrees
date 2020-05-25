@@ -58,6 +58,44 @@ void RedBlackTree::InsertElement(int data)
 
 void RedBlackTree::RemoveElement(int data)
 {
+    Node* nodeToRemove = SearchElement(data);
+    Node* nodeCopy = nodeToRemove;
+    Color originalColor = nodeCopy->color;
+    Node* x;
+    if(nodeToRemove->left == NIL)
+    {
+        x = nodeToRemove->rigth;
+        Transplant(nodeToRemove,nodeToRemove->rigth);
+    }
+    else if(nodeToRemove->rigth == NIL)
+    {
+        x = nodeToRemove->left;
+        Transplant(nodeToRemove,nodeToRemove->left);
+    }
+    else
+    {
+        nodeCopy = treeMinimum(nodeToRemove->rigth);
+        originalColor = nodeCopy->color;
+        x = nodeCopy->rigth;
+        if(nodeCopy->parent == nodeToRemove)
+        {
+            x->parent = nodeCopy;
+        }
+        else
+        {
+            Transplant(nodeCopy,nodeCopy->rigth);
+            nodeCopy->rigth = nodeToRemove->rigth;
+            nodeCopy->rigth->parent = nodeCopy;
+        }
+        Transplant(nodeToRemove,nodeCopy);
+        nodeCopy->left = nodeToRemove->left;
+        nodeCopy->left->parent = nodeCopy;
+        nodeCopy->color = nodeToRemove->color;
+    }
+    if(originalColor == Black)
+    {
+        RemovalFixup(x);
+    }
     return;
 }
 
@@ -177,6 +215,74 @@ void RedBlackTree::Transplant(Node *transplantedNode, Node *transplantNode)
 
 void RedBlackTree::RemovalFixup(Node *nodeToFix)
 {
+    while (nodeToFix!=root&&nodeToFix->color == Black)
+    {
+        if(nodeToFix == nodeToFix->parent->left)
+        {
+            Node* sibling = nodeToFix->parent->rigth;
+            if(sibling->color == Red)
+            {
+                sibling->color = Black;
+                nodeToFix->parent->color = Red;
+                LeftRotate(nodeToFix->parent);
+                sibling = nodeToFix->parent->rigth;
+            }
+            if(sibling->left->color == Black && sibling->rigth->color == Black)
+            {
+                sibling->color = Red;
+                nodeToFix = nodeToFix->parent;
+            }
+            else if(sibling->rigth->color == Red)
+            {
+                sibling->left->color = Black;
+                sibling->color = Red;
+                RightRotate(sibling);
+                sibling = nodeToFix->parent->rigth;
+            }
+            sibling->color = nodeToFix->parent->color;
+            nodeToFix->parent->color = Black;
+            sibling->rigth->color = Black;
+            LeftRotate(nodeToFix->parent);
+            nodeToFix = root;
+        }
+        else
+        {
+            Node* sibling = nodeToFix->parent->left;
+            if(sibling->color == Red)
+            {
+                sibling->color = Black;
+                nodeToFix->parent->color = Red;
+                LeftRotate(nodeToFix->parent);
+                sibling = nodeToFix->parent->left;
+            }
+            if(sibling->left->color == Black && sibling->rigth->color == Black)
+            {
+                sibling->color = Red;
+                nodeToFix = nodeToFix->parent;
+            }
+            else if(sibling->left->color == Red)
+            {
+                sibling->rigth->color = Black;
+                sibling->color = Red;
+                RightRotate(sibling);
+                sibling = nodeToFix->parent->left;
+            }
+            sibling->color = nodeToFix->parent->color;
+            nodeToFix->parent->color = Black;
+            sibling->left->color = Black;
+            LeftRotate(nodeToFix->parent);
+            nodeToFix = root;
+        }
+    }
+    nodeToFix->color = Black;
+}
 
+Node *RedBlackTree::treeMinimum(Node *subtreeRoot)
+{
+    while (subtreeRoot->left)
+    {
+        subtreeRoot = subtreeRoot->left;
+    }
+    return subtreeRoot;
 }
 
